@@ -16,7 +16,7 @@ project1:
     gutter_width: 10
   custom_baseline:
     baseline_ratio:1.25
-    font_size:13px
+    font_size:13
   plugins:
     - fancy-type
     - buttons
