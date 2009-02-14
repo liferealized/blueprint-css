@@ -5,7 +5,7 @@ module Blueprint
     # path to ERB file used for CSS template
     CSS_ERB_FILE = File.join(Blueprint::LIB_PATH, 'grid.css.erb')
   
-    attr_writer :column_count, :column_width, :gutter_width
+    attr_writer :column_count, :column_width, :gutter_width, :baseline_ratio
 
     # Column count of generated CSS.  Returns itself or Blueprint's default
     def column_count
@@ -26,21 +26,28 @@ module Blueprint
     def page_width
       column_count * (column_width + gutter_width) - gutter_width
     end
-  
+
+# Baseline ratio of css.  Returns itself or Blueprint's default
+    def baseline_ratio
+      (@baseline_ratio || Blueprint::BASELINE_RATIO).to_f
+    end
+    
     # ==== Options
     # * <tt>options</tt>
     #   * <tt>:column_count</tt> -- Sets the column count of generated CSS
     #   * <tt>:column_width</tt> -- Sets the column width (in pixels) of generated CSS
     #   * <tt>:gutter_width</tt> -- Sets the gutter width (in pixels) of generated CSS
+    #   * <tt>:baseline_ratio</tt> -- Sets the baseline ratio
     def initialize(options = {})
       @column_count = options[:column_count]
       @column_width = options[:column_width]
       @gutter_width = options[:gutter_width]
+      @baseline_ratio = options[:baseline_ratio]
     end
   
     # Boolean value if current settings are Blueprint's defaults
     def default?
-      self.column_width == Blueprint::COLUMN_WIDTH && self.column_count == Blueprint::COLUMN_COUNT && self.gutter_width == Blueprint::GUTTER_WIDTH
+      self.column_width == Blueprint::COLUMN_WIDTH && self.column_count == Blueprint::COLUMN_COUNT && self.gutter_width == Blueprint::GUTTER_WIDTH && self.baseline_ratio == Blueprint::BASELINE_RATIO
     end
     
     # Loads grid.css.erb file, binds it to current instance, and returns output

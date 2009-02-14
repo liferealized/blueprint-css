@@ -29,6 +29,10 @@ module Blueprint
   COLUMN_WIDTH =          30
   # default gutter width (in pixels) for Blueprint layout
   GUTTER_WIDTH =          10
+  # default baseline ratio for Blueprint typography
+  BASELINE_RATIO =        1.5
+  # default font size (in pixels) for Blueprint typography
+  FONT_SIZE =               12
 end
 
 Dir["#{File.join(Blueprint::LIB_PATH)}/*"].each do |file|

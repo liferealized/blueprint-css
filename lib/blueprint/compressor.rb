@@ -8,7 +8,7 @@ module Blueprint
                   'parts/grid.html', 
                   'parts/sample.html']
     
-    attr_accessor :namespace, :custom_css, :custom_layout, :semantic_classes, :project_name, :plugins
+    attr_accessor :namespace, :custom_css, :custom_layout, :custom_baseline, :custom_reset, :custom_forms, :semantic_classes, :project_name, :plugins
     attr_reader   :custom_path, :loaded_from_settings, :destination_path, :script_name
     
     # overridden setter method for destination_path
@@ -26,6 +26,9 @@ module Blueprint
       self.namespace = ""
       self.destination_path = Blueprint::BLUEPRINT_ROOT_PATH
       self.custom_layout = CustomLayout.new
+      self.custom_baseline = CustomBaseline.new
+      self.custom_reset = CustomReset.new
+      self.custom_forms = CustomForms.new
       self.project_name = nil
       self.custom_css = {}
       self.semantic_classes = {}
@@ -85,9 +88,19 @@ module Blueprint
         self.semantic_classes = project['semantic_classes'] || {}
         self.plugins =          project['plugins']          || []
       
-        if (layout = project['custom_layout'])
+        if (layout = project['custom_layout'] && baseline = project['custom_baseline'])
+          self.custom_layout = CustomLayout.new(:column_count => layout['column_count'], :column_width => layout['column_width'], :gutter_width => layout['gutter_width'], :baseline_ratio => baseline['baseline_ratio'])
+          self.custom_baseline = CustomBaseline.new(:baseline_ratio => baseline['baseline_ratio'], :font_size => baseline['font_size'])
+          self.custom_reset = CustomReset.new(:baseline_ratio => baseline['baseline_ratio'])
+          self.custom_forms = CustomForms.new(:baseline_ratio => baseline['baseline_ratio'])
+        elsif (layout = project['custom_layout'])
           self.custom_layout = CustomLayout.new(:column_count => layout['column_count'], :column_width => layout['column_width'], :gutter_width => layout['gutter_width'])
+        elsif (baseline = project['custom_baseline'])
+          self.custom_baseline = CustomBaseline.new(:baseline_ratio => baseline['baseline_ratio'], :font_size => baseline['font_size'])
+          self.custom_reset = CustomReset.new(:baseline_ratio => baseline['baseline_ratio'])
+          self.custom_forms = CustomForms.new(:baseline_ratio => baseline['baseline_ratio'])
         end
+        
         @loaded_from_settings = true
       end
     end
@@ -108,6 +121,12 @@ module Blueprint
         
           source_options = if self.custom_layout && css_source_file == 'grid.css'
             self.custom_layout.generate_grid_css
+          elsif self.custom_baseline && css_source_file == 'typography.css'
+            self.custom_baseline.generate_typography_css
+          elsif self.custom_reset && css_source_file == 'reset.css'
+            self.custom_reset.generate_reset_css
+          elsif self.custom_forms && css_source_file == 'forms.css'
+            self.custom_forms.generate_forms_css
           else
             File.path_to_string File.join(Blueprint::SOURCE_PATH, css_source_file)
           end
@@ -221,10 +240,12 @@ module Blueprint
       puts "  **   Namespace: '#{namespace}'" unless namespace.blank?
       puts "  **   Output to: #{destination_path}"
       puts "  **   Grid Settings:"
-      puts "  **     - Column Count: #{self.custom_layout.column_count}"
-      puts "  **     - Column Width: #{self.custom_layout.column_width}px"
-      puts "  **     - Gutter Width: #{self.custom_layout.gutter_width}px"
-      puts "  **     - Total Width : #{self.custom_layout.page_width}px"
+      puts "  **     - Column Count   : #{self.custom_layout.column_count}"
+      puts "  **     - Column Width   : #{self.custom_layout.column_width}px"
+      puts "  **     - Gutter Width   : #{self.custom_layout.gutter_width}px"
+      puts "  **     - Total Width    : #{self.custom_layout.page_width}px"
+      puts "  **     - Baseline ratio : #{self.custom_baseline.baseline_ratio}"
+      puts "  **     - Font size      : #{self.custom_baseline.font_size}px"
       puts "  **"
       puts "  #{"*" * 100}"
     end

@@ -13,26 +13,30 @@ module Blueprint
     rescue Exception => e
     end
 
-    attr_reader :column_width, :gutter_width, :output_path, :able_to_generate
+    attr_reader :column_width, :gutter_width, :output_path, :able_to_generate, :baseline_ratio, :font_size
 
     # ==== Options
     # * <tt>options</tt>
     #   * <tt>:column_width</tt> -- Width (in pixels) of current grid column
     #   * <tt>:gutter_width</tt> -- Width (in pixels) of current grid gutter
     #   * <tt>:output_path</tt> -- Output path of grid.png file
+    #   * <tt>:baseline_ratio</tt> -- Sets the baseline ratio
+    #   * <tt>:font_size</tt> -- Sets the font_size for the css
     def initialize(options={})
       @able_to_generate = Magick::Long_version rescue false
       return unless @able_to_generate
       @column_width = options[:column_width] || Blueprint::COLUMN_WIDTH
       @gutter_width = options[:gutter_width] || Blueprint::GUTTER_WIDTH
       @output_path  = options[:output_path]  || Blueprint::SOURCE_PATH
+      @baseline_ratio = options[:baseline_ratio] || Blueprint::BASELINE_RATIO
+      @font_size  = options[:font_size]  || Blueprint::FONT_SIZE
     end
   
     # generates (overwriting if necessary) grid.png image to be tiled in background
     def generate!
       return false unless self.able_to_generate
       total_width = self.column_width + self.gutter_width
-      height = 18
+      height = "%.0f" % (self.font_size.to_f * self.baseline_ratio.to_f )
       RVG::dpi = 100
 
       rvg = RVG.new((total_width.to_f/RVG::dpi).in, (height.to_f/RVG::dpi).in).viewbox(0, 0, total_width, height) do |canvas|
